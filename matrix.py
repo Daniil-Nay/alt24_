@@ -10,19 +10,39 @@ from typing import List, Union
 class Matrix:
 
     def __init__(self, rows):
+        """
+        Инициализирует объект класса Matrix.
+
+        :param rows: Список списков, представляющих строки матрицы.
+        :return: None
+        """
+
         self.expanded_matrix = None
         self.rows = rows
         self.num_rows = len(rows)
         self.num_cols = len(rows[0])
 
     def __getitem__(self, index) -> 'Matrix':
+        """
+        возвращает строку матрицы по индексу
+        :param index: индекс строки
+        :return: Объект класса Matrix
+        """
         return self.rows[index]
 
     def __tr__(self) -> None:
+        """
+        Транспонирует матрицу.
+        :return: None
+        """
         self.rows = [[self.rows[j][i] for j in range(self.num_rows)] for i in range(self.num_cols)]
         self.num_rows, self.num_cols = self.num_cols, self.num_rows
 
     def __determinant(self) -> Union[int, float, ValueError]:
+        """
+        Вычисляет определитель матрицы.
+        :return: Определитель матрицы или ValueError, если матрица не квадратная.
+        """
         if self.num_rows != self.num_cols:
             raise ValueError("Матрица должна быть квадратной для вычисления определителя")
 
@@ -35,13 +55,27 @@ class Matrix:
         return det
 
     def __minor(self, row, col) -> 'Matrix':
+        """
+        Возвращает минор матрицы по заданным строке и столбцу.
+        :param row: Индекс строки.
+        :param col: Индекс столбца.
+        :return: Минор матрицы.
+        """
         minors = [row[:col] + row[col + 1:] for row in (self.rows[:row] + self.rows[row + 1:])]
         return Matrix(minors)
 
     def __copy(self) -> 'Matrix':
+        """
+        Создает копию матрицы.
+        :return: Копия матрицы.
+        """
         return Matrix([row[:] for row in self.rows])
 
     def __submatrices_2x2(self) -> list:
+        """
+        Создает список всех 2x2 подматриц данной матрицы.
+        :return: Список 2x2 подматриц.
+        """
         sub_matrices = []
         for i in range(self.num_rows - 1):
             for j in range(self.num_cols - 1):
@@ -51,6 +85,11 @@ class Matrix:
 
     @private
     def __same_sign(self, num) -> bool:
+        """
+        Проверяет, имеют ли все элементы матрицы один и тот же знак.
+        :param num: Число для проверки знака.
+        :return: True, если все элементы имеют одинаковый знак, иначе False.
+        """
         # Проверяем, является ли num числовым значением или символьным выражением
         if isinstance(num, (int, float)):
             return all(num * elem > 0 for row in self.rows for elem in row)
@@ -61,6 +100,11 @@ class Matrix:
             return all(num * elem > 0 for elem in nums)
 
     def __solve_cramer(self, vector) -> List[Union[ValueError, list]]:
+        """
+        Решает систему уравнений методом Крамера.
+        :param vector: Вектор правых частей уравнений.
+        :return: Список решений или ValueError, если определитель равен нулю.
+        """
         print("1. Метод Крамера\n")
         det_A = self.__determinant()
         if det_A == 0:
@@ -94,6 +138,10 @@ class Matrix:
         return solutions
 
     def __set_expanded_matrix(self) -> 'Matrix':
+        """
+        Создает расширенную матрицу, добавляя пустую строку и столбец.
+        :return: Расширенная матрица.
+        """
         # Создаем новую матрицу с пустой строкой и столбцом в начале
         self.expanded_matrix = [[0] * (self.num_cols + 1) for _ in range(self.num_rows + 1)]
 
@@ -104,7 +152,11 @@ class Matrix:
         return Matrix(self.expanded_matrix)
 
     def _some_calcs_algorithm_step_1(self, vector) -> None:
-
+        """
+        Выполняет первый шаг алгоритма расчета оптимальных стратегий.
+        :param vector: Вектор правых частей уравнений.
+        :return: None
+        """
         solutions = self.__solve_cramer(vector)
         total_determinant = self.__determinant()
         solutions = {
@@ -127,6 +179,11 @@ class Matrix:
                 self.__some_calcs_algorith_step_2()
 
     def __some_calcs_algorith_step_2(self) -> None:
+        """
+        Выполняет второй шаг алгоритма расчета оптимальных стратегий.
+        :return: None
+        """
+
         print("\n3. Поиск оптимальных стратегий игроков 1 и 2 перебором подматриц исходной матрицы:", *self.rows,
               sep="\n")
         self.__set_expanded_matrix()
@@ -241,10 +298,15 @@ class Matrix:
                     f"А также в игре с первоначальной платежной матрицей",
                     *self.rows,
                     f"А стратегии игрока 1 {[row[0] for row in local_exp_matrix]} и игрока 2 {local_exp_matrix[0][1:]}",
-                    "являются оптимапльными",
+                    "являются оптимальными",
                     sep="\n")
 
     def matrix_info(self, vector):
+        """
+        Выводит информацию о матрице и решает задачу оптимальных стратегий.
+        :param vector: Вектор правых частей уравнений.
+        :return: None
+        """
         n = 20
         print('-' * n, "Входные данные:", *self.rows, '-' * n, "Алгоритм:", sep="\n", )
         self._some_calcs_algorithm_step_1(vector)
